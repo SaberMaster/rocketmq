@@ -264,6 +264,7 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
         AllocateMessageQueueStrategy allocateMessageQueueStrategy) {
         this.consumerGroup = consumerGroup;
         this.allocateMessageQueueStrategy = allocateMessageQueueStrategy;
+        // create DefaultMQPushConsumerImpl object
         defaultMQPushConsumerImpl = new DefaultMQPushConsumerImpl(this, rpcHook);
     }
 
@@ -282,6 +283,9 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
      * @param consumerGroup Consumer group.
      */
     public DefaultMQPushConsumer(final String consumerGroup) {
+        // use this usually
+        // rpc hook is null
+        // lb strategy is average
         this(consumerGroup, null, new AllocateMessageQueueAveragely());
     }
 
@@ -517,6 +521,7 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
      */
     @Override
     public void start() throws MQClientException {
+        // start
         this.defaultMQPushConsumerImpl.start();
     }
 

@@ -52,6 +52,7 @@ public class ClientConfig {
     private LanguageCode language = LanguageCode.JAVA;
 
     public String buildMQClientId() {
+        //clientIP@instanceName[@unitName]
         StringBuilder sb = new StringBuilder();
         sb.append(this.getClientIP());
 
@@ -82,6 +83,7 @@ public class ClientConfig {
     }
 
     public void changeInstanceNameToPID() {
+        //if default get pid
         if (this.instanceName.equals("DEFAULT")) {
             this.instanceName = String.valueOf(UtilAll.getPid());
         }
