@@ -171,6 +171,7 @@ public class HAService {
          * @throws Exception If fails.
          */
         public void beginAccept() throws Exception {
+            // master listener
             this.serverSocketChannel = ServerSocketChannel.open();
             this.selector = RemotingUtil.openSelector();
             this.serverSocketChannel.socket().setReuseAddress(true);
@@ -498,10 +499,12 @@ public class HAService {
                 String addr = this.masterAddress.get();
                 if (addr != null) {
 
+                    // connect remote by java nio
                     SocketAddress socketAddress = RemotingUtil.string2SocketAddress(addr);
                     if (socketAddress != null) {
                         this.socketChannel = RemotingUtil.connect(socketAddress);
                         if (this.socketChannel != null) {
+                            // read
                             this.socketChannel.register(this.selector, SelectionKey.OP_READ);
                         }
                     }
@@ -544,10 +547,12 @@ public class HAService {
 
         @Override
         public void run() {
+            // when ha client run
             log.info(this.getServiceName() + " service started");
 
             while (!this.isStopped()) {
                 try {
+                    // connect master(the master addr is assign when broker is slave)
                     if (this.connectMaster()) {
 
                         if (this.isTimeToReportOffset()) {

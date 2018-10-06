@@ -393,14 +393,17 @@ public class BrokerController {
                 }, 1000 * 10, 1000 * 60 * 2, TimeUnit.MILLISECONDS);
             }
 
+            // check role is slave
             if (BrokerRole.SLAVE == this.messageStoreConfig.getBrokerRole()) {
                 if (this.messageStoreConfig.getHaMasterAddress() != null && this.messageStoreConfig.getHaMasterAddress().length() >= 6) {
+                    // update master addr
                     this.messageStore.updateHaMasterAddress(this.messageStoreConfig.getHaMasterAddress());
                     this.updateMasterHAServerAddrPeriodically = false;
                 } else {
                     this.updateMasterHAServerAddrPeriodically = true;
                 }
 
+                // sync schedule
                 this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
                     @Override

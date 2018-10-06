@@ -55,6 +55,7 @@ public class BrokerStartup {
     public static InternalLogger log;
 
     public static void main(String[] args) {
+        // create broker controller
         start(createBrokerController(args));
     }
 
@@ -215,6 +216,7 @@ public class BrokerStartup {
             // remember all configs to prevent discard
             controller.getConfiguration().registerConfig(properties);
 
+            // init controller
             boolean initResult = controller.initialize();
             if (!initResult) {
                 controller.shutdown();

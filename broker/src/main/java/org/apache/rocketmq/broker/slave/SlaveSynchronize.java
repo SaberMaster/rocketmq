@@ -46,9 +46,13 @@ public class SlaveSynchronize {
     }
 
     public void syncAll() {
+        // sync topic config
         this.syncTopicConfig();
+        // consumer offset
         this.syncConsumerOffset();
+        // delay offset
         this.syncDelayOffset();
+        // subscript group config
         this.syncSubscriptionGroupConfig();
     }
 
@@ -80,6 +84,7 @@ public class SlaveSynchronize {
         String masterAddrBak = this.masterAddr;
         if (masterAddrBak != null) {
             try {
+                // get all consumer offset
                 ConsumerOffsetSerializeWrapper offsetWrapper =
                     this.brokerController.getBrokerOuterAPI().getAllConsumerOffset(masterAddrBak);
                 this.brokerController.getConsumerOffsetManager().getOffsetTable()

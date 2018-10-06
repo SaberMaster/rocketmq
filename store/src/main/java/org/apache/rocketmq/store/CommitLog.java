@@ -623,6 +623,7 @@ public class CommitLog {
         storeStatsService.getSinglePutMessageTopicSizeTotal(topic).addAndGet(result.getWroteBytes());
 
         handleDiskFlush(result, putMessageResult, msg);
+        // handle HA
         handleHA(result, putMessageResult, msg);
 
         return putMessageResult;
@@ -656,6 +657,7 @@ public class CommitLog {
     }
 
     public void handleHA(AppendMessageResult result, PutMessageResult putMessageResult, MessageExt messageExt) {
+        // sync_master
         if (BrokerRole.SYNC_MASTER == this.defaultMessageStore.getMessageStoreConfig().getBrokerRole()) {
             HAService service = this.defaultMessageStore.getHaService();
             if (messageExt.isWaitStoreMsgOK()) {
@@ -663,7 +665,9 @@ public class CommitLog {
                 if (service.isSlaveOK(result.getWroteOffset() + result.getWroteBytes())) {
                     GroupCommitRequest request = new GroupCommitRequest(result.getWroteOffset() + result.getWroteBytes());
                     service.putRequest(request);
+                    // wake up
                     service.getWaitNotifyObject().wakeupAll();
+                    // wait for flush
                     boolean flushOK =
                         request.waitForFlush(this.defaultMessageStore.getMessageStoreConfig().getSyncFlushTimeout());
                     if (!flushOK) {
@@ -774,6 +778,7 @@ public class CommitLog {
 
         handleDiskFlush(result, putMessageResult, messageExtBatch);
 
+        // handle HA
         handleHA(result, putMessageResult, messageExtBatch);
 
         return putMessageResult;
