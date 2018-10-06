@@ -48,7 +48,9 @@ import org.apache.rocketmq.remoting.common.RemotingUtil;
 public class RouteInfoManager {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
+    // use reetrant read write lock
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    // store cluster meta info
     private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
     private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
     private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
@@ -70,7 +72,9 @@ public class RouteInfoManager {
         return clusterInfoSerializeWrapper.encode();
     }
 
+    // remove topic
     public void deleteTopic(final String topic) {
+        // use write lock
         try {
             try {
                 this.lock.writeLock().lockInterruptibly();

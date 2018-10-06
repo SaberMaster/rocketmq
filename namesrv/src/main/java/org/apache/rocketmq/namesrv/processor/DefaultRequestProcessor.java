@@ -66,6 +66,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         this.namesrvController = namesrvController;
     }
 
+    // handle request
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx,
         RemotingCommand request) throws RemotingCommandException {
@@ -77,7 +78,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
                 request);
         }
 
-
+        // handle by different request code
         switch (request.getCode()) {
             case RequestCode.PUT_KV_CONFIG:
                 return this.putKVConfig(ctx, request);
@@ -87,6 +88,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
                 return this.deleteKVConfig(ctx, request);
             case RequestCode.QUERY_DATA_VERSION:
                 return queryBrokerTopicConfig(ctx, request);
+                // register broker
             case RequestCode.REGISTER_BROKER:
                 Version brokerVersion = MQVersion.value2Version(request.getVersion());
                 if (brokerVersion.ordinal() >= MQVersion.Version.V3_0_11.ordinal()) {

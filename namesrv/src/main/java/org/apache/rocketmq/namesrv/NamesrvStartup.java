@@ -72,6 +72,7 @@ public class NamesrvStartup {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
         //PackageConflictDetect.detectFastjson();
 
+        // resolve command line params
         Options options = ServerUtil.buildCommandlineOptions(new Options());
         commandLine = ServerUtil.parseCmdLine("mqnamesrv", args, buildCommandlineOptions(options), new PosixParser());
         if (null == commandLine) {
@@ -81,10 +82,13 @@ public class NamesrvStartup {
 
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+        // listen 9876 port
         nettyServerConfig.setListenPort(9876);
+        // -c param
         if (commandLine.hasOption('c')) {
             String file = commandLine.getOptionValue('c');
             if (file != null) {
+                // load config properties
                 InputStream in = new BufferedInputStream(new FileInputStream(file));
                 properties = new Properties();
                 properties.load(in);
@@ -98,7 +102,9 @@ public class NamesrvStartup {
             }
         }
 
+        // -p param
         if (commandLine.hasOption('p')) {
+            // print properties
             MixAll.printObjectProperties(null, namesrvConfig);
             MixAll.printObjectProperties(null, nettyServerConfig);
             System.exit(0);
@@ -122,6 +128,7 @@ public class NamesrvStartup {
         MixAll.printObjectProperties(log, namesrvConfig);
         MixAll.printObjectProperties(log, nettyServerConfig);
 
+        // init controller
         final NamesrvController controller = new NamesrvController(namesrvConfig, nettyServerConfig);
 
         // remember all configs to prevent discard
@@ -136,12 +143,14 @@ public class NamesrvStartup {
             throw new IllegalArgumentException("NamesrvController is null");
         }
 
+        // init controller
         boolean initResult = controller.initialize();
         if (!initResult) {
             controller.shutdown();
             System.exit(-3);
         }
 
+        // add shutdown hook
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -150,6 +159,7 @@ public class NamesrvStartup {
             }
         }));
 
+        // start controller
         controller.start();
 
         return controller;

@@ -46,6 +46,7 @@ public class NamesrvController {
 
     private final NettyServerConfig nettyServerConfig;
 
+    // single thread schedule pool
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
         "NSScheduledThread"));
     private final KVConfigManager kvConfigManager;
@@ -77,13 +78,17 @@ public class NamesrvController {
 
         this.kvConfigManager.load();
 
+        // init remoting server
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
+        // init thread pool
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
+        // register remoting server processor
         this.registerProcessor();
 
+        // register scan not active broker mission
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -92,6 +97,7 @@ public class NamesrvController {
             }
         }, 5, 10, TimeUnit.SECONDS);
 
+        // register print all period mission
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -142,6 +148,7 @@ public class NamesrvController {
     }
 
     private void registerProcessor() {
+        // choose different processor according config
         if (namesrvConfig.isClusterTest()) {
 
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
