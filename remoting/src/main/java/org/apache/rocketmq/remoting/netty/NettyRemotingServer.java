@@ -108,6 +108,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             }
         });
 
+        // boss single thread NioEventLoopGroup
         this.eventLoopGroupBoss = new NioEventLoopGroup(1, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
 
@@ -117,7 +118,9 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             }
         });
 
+        // is epoll available
         if (useEpoll()) {
+            // worker group default 3 thread EpollEventLoopGroup
             this.eventLoopGroupSelector = new EpollEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new ThreadFactory() {
                 private AtomicInteger threadIndex = new AtomicInteger(0);
                 private int threadTotal = nettyServerConfig.getServerSelectorThreads();
@@ -128,6 +131,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 }
             });
         } else {
+            // worker group default 3 thread NioEventLoopGroup
             this.eventLoopGroupSelector = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new ThreadFactory() {
                 private AtomicInteger threadIndex = new AtomicInteger(0);
                 private int threadTotal = nettyServerConfig.getServerSelectorThreads();
@@ -166,6 +170,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
     @Override
     public void start() {
+        // event thread pool
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(
             nettyServerConfig.getServerWorkerThreads(),
             new ThreadFactory() {
@@ -194,11 +199,14 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                         ch.pipeline()
                             .addLast(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME,
                                 new HandshakeHandler(TlsSystemConfig.tlsMode))
+                                // the handlers below run in event thread pool
                             .addLast(defaultEventExecutorGroup,
+                                // encoder decoder
                                 new NettyEncoder(),
                                 new NettyDecoder(),
                                 new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
                                 new NettyConnectManageHandler(),
+                                // register server handler
                                 new NettyServerHandler()
                             );
                     }
@@ -277,6 +285,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         }
 
         Pair<NettyRequestProcessor, ExecutorService> pair = new Pair<NettyRequestProcessor, ExecutorService>(processor, executorThis);
+        // put in a pair
         this.processorTable.put(requestCode, pair);
     }
 
@@ -394,6 +403,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, RemotingCommand msg) throws Exception {
+            // handle msg
             processMessageReceived(ctx, msg);
         }
     }

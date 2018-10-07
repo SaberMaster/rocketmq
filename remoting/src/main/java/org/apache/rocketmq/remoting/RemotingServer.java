@@ -27,11 +27,14 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 public interface RemotingServer extends RemotingService {
 
+    // register processor
     void registerProcessor(final int requestCode, final NettyRequestProcessor processor,
         final ExecutorService executor);
 
+    // register default processor
     void registerDefaultProcessor(final NettyRequestProcessor processor, final ExecutorService executor);
 
+    // listen port
     int localListenPort();
 
     Pair<NettyRequestProcessor, ExecutorService> getProcessorPair(final int requestCode);

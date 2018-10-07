@@ -164,12 +164,14 @@ public abstract class NettyRemotingAbstract {
      * @param ctx channel handler context.
      * @param cmd request command.
      */
+    // process request command
     public void processRequestCommand(final ChannelHandlerContext ctx, final RemotingCommand cmd) {
         final Pair<NettyRequestProcessor, ExecutorService> matched = this.processorTable.get(cmd.getCode());
         final Pair<NettyRequestProcessor, ExecutorService> pair = null == matched ? this.defaultRequestProcessor : matched;
         final int opaque = cmd.getOpaque();
 
         if (pair != null) {
+            // gen handle runnable object
             Runnable run = new Runnable() {
                 @Override
                 public void run() {
@@ -178,7 +180,7 @@ public abstract class NettyRemotingAbstract {
                         if (rpcHook != null) {
                             rpcHook.doBeforeRequest(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd);
                         }
-
+                        // call the register processor
                         final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
                         if (rpcHook != null) {
                             rpcHook.doAfterResponse(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd, response);
@@ -223,6 +225,7 @@ public abstract class NettyRemotingAbstract {
 
             try {
                 final RequestTask requestTask = new RequestTask(run, ctx.channel(), cmd);
+                // use executor to execute
                 pair.getObject2().submit(requestTask);
             } catch (RejectedExecutionException e) {
                 if ((System.currentTimeMillis() % 10000) == 0) {
@@ -367,6 +370,7 @@ public abstract class NettyRemotingAbstract {
             final ResponseFuture responseFuture = new ResponseFuture(channel, opaque, timeoutMillis, null, null);
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
+            //channel send request
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture f) throws Exception {
@@ -384,6 +388,8 @@ public abstract class NettyRemotingAbstract {
                 }
             });
 
+            // wait for response
+            // wait for putResponse(countdownlatch)
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {

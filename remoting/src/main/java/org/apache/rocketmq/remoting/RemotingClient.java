@@ -27,10 +27,12 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 public interface RemotingClient extends RemotingService {
 
+    // update nameserver addr list(get valid nameserver addrs)
     void updateNameServerAddressList(final List<String> addrs);
 
     List<String> getNameServerAddressList();
 
+    // invoke sync(invoke remote server)
     RemotingCommand invokeSync(final String addr, final RemotingCommand request,
         final long timeoutMillis) throws InterruptedException, RemotingConnectException,
         RemotingSendRequestException, RemotingTimeoutException;
@@ -39,6 +41,7 @@ public interface RemotingClient extends RemotingService {
         final InvokeCallback invokeCallback) throws InterruptedException, RemotingConnectException,
         RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
+    // invoke oneway(invoke remote server)
     void invokeOneway(final String addr, final RemotingCommand request, final long timeoutMillis)
         throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException,
         RemotingTimeoutException, RemotingSendRequestException;

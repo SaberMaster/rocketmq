@@ -69,6 +69,7 @@ public class RemotingCommand {
         }
     }
 
+    // struct
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
     private int version = 0;
@@ -141,6 +142,7 @@ public class RemotingCommand {
         return decode(byteBuffer);
     }
 
+    // decode
     public static RemotingCommand decode(final ByteBuffer byteBuffer) {
         int length = byteBuffer.limit();
         int oriHeaderLen = byteBuffer.getInt();

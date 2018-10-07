@@ -65,6 +65,7 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
     public ConsumeMessageOrderlyService(DefaultMQPushConsumerImpl defaultMQPushConsumerImpl,
         MessageListenerOrderly messageListener) {
         this.defaultMQPushConsumerImpl = defaultMQPushConsumerImpl;
+        // set orderly listener
         this.messageListener = messageListener;
 
         this.defaultMQPushConsumer = this.defaultMQPushConsumerImpl.getDefaultMQPushConsumer();
@@ -147,6 +148,7 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
         log.info("consumeMessageDirectly receive new message: {}", msg);
 
         try {
+            // consume msg
             ConsumeOrderlyStatus status = this.messageListener.consumeMessage(msgs, context);
             if (status != null) {
                 switch (status) {
@@ -522,6 +524,7 @@ public class ConsumeMessageOrderlyService implements ConsumeMessageService {
                             ConsumeMessageOrderlyService.this.getConsumerStatsManager()
                                 .incConsumeRT(ConsumeMessageOrderlyService.this.consumerGroup, messageQueue.getTopic(), consumeRT);
 
+                            // handle result
                             continueConsume = ConsumeMessageOrderlyService.this.processConsumeResult(msgs, status, context, this);
                         } else {
                             continueConsume = false;
